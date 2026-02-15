@@ -1,5 +1,5 @@
-#Imortante!!!
-Estos archivos son informativos unicamente. Pueden cambiar y actualizarse en el tiempo.
+#Importante!!!
+Estos archivos son informativos únicamente. Pueden cambiar y actualizarse en el tiempo.
 
 Esta carpeta mantiene el código empleado para analizar el contenido de cada 
 documento que se obtiene de las consultas a las basesde datos de Dimensions y IEEE Xplore.
