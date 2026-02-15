@@ -1,1 +1,7 @@
-#test
+#Importante!!!
+Estos archivos son informativos únicamente. Pueden cambiar y actualizarse en el tiempo.
+
+Esta carpeta mantiene el código empleado para analizar el contenido de cada 
+documento que se obtiene de las consultas a las basesde datos de Dimensions y IEEE Xplore.
+El código está desarrollado en C++.
+El archivo CMakeLists.txt indica las librerías que deben estar instaladas en el sistema de cómputo del desarrollador.
