@@ -1,0 +1,178 @@
+//DB collection ieeeData
+    var getValidKeywordDois =
+        [
+            {
+                '$addFields': {
+                    'year': {
+                        '$year': '$published'
+                    },
+                    'lenA': {
+                        '$strLenCP': '$abstract'
+                    },
+                    'lenL': {
+                        '$strLenCP': '$label'
+                    },
+                    'keyWords': {
+                        '$concatArrays': [
+                            '$ieeeKeyW', '$authorKW'
+                        ]
+                    }
+                }
+            }, {
+            '$match': {
+                'keyWords': {
+                    '$ne': null
+                },
+                '$or': [
+                    {
+                        'ieeeKeyW': {
+                            '$exists': true
+                        }
+                    }, {
+                        'authorKW': {
+                            '$exists': true
+                        }
+                    }
+                ],
+                'year': {
+                    '$gte': 2016
+                },
+                'lenA': {
+                    '$gt': 0
+                },
+                'lenL': {
+                    '$gt': 0
+                }
+            }
+        }, {
+            '$addFields': {
+                'joinedString': {
+                    '$rtrim': {
+                        'input': {
+                            '$reduce': {
+                                'input': '$keyWords',
+                                'initialValue': '',
+                                'in': {
+                                    '$concat': [
+                                        '$$value', {
+                                            '$toString': '$$this'
+                                        }, ', '
+                                    ]
+                                }
+                            }
+                        },
+                        'chars': ', '
+                    }
+                }
+            }
+        }, {
+            '$match': {
+                'joinedString': {
+                    '$not':regExArray,
+                }
+            }
+        }, {
+            '$unwind': {
+                'path': '$keyWords'
+            }
+        }, {
+            '$addFields': {
+                'doitext': {
+                    '$concat': [
+                        {
+                            '$toLower': '$doi'
+                        }, '<<>>', {
+                            '$toString': '$year'
+                        }, '<<>>', '$abstract', ' ** ', '$label'
+                    ]
+                }
+            }
+        }, {
+            '$group': {
+                '_id': 'doi',
+                'dois': {
+                    '$addToSet': '$doitext'
+                },
+                'keyWords': {
+                    '$addToSet': {
+                        '$trim': {
+                            'input': '$keyWords'
+                        }
+                    }
+                }
+            }
+        }, {
+            '$project': {
+                'keyWords': {
+                    '$sortArray': {
+                        'input': '$keyWords',
+                        'sortBy': 1
+                    }
+                },
+                'dois': {
+                    '$sortArray': {
+                        'input': '$dois',
+                        'sortBy': 1
+                    }
+                }
+            }
+        }
+        ];
+        
+//DB collection dimensionsDB
+var validRelatedKeywordDOIs =
+    [
+        {
+            '$addFields': {
+                'lenA': {
+                    '$strLenCP': '$Abstract'
+                },
+                'year': {
+                    '$year': '$published'
+                }
+            }
+        }, {
+        '$match': {
+            'lenA': {
+                '$gt': 0
+            }
+        }
+    }, {
+        '$addFields': {
+            'doitext': {
+                '$concat': [
+                    {
+                        '$toLower': '$doi'
+                    }, '<<>>', {
+                        '$toString': '$year'
+                    }, '<<>>', '$Abstract', ' ** ', '$Title'
+                ]
+            }
+        }
+    }, {
+        '$match': {
+            'doitext': {
+                '$not': regExArray,
+            }
+        }
+    }, {
+        '$group': {
+            '_id': 'doi',
+            'dois': {
+                '$addToSet': '$doitext'
+            }
+        }
+    }, {
+        '$project': {
+            '_id': 0,
+            'dois': 1
+        }
+    }
+    ];
+
+var regExArray =
+    {
+        '$regex': '\\b(Text Classification|Smoke Recognition|Linguistics|Text Categorization|Metaverse|Meteorology|Weld Seam|Epidemics|Diseases|fake news|weather|wind|Sports|Sociology|Rain|Phosphorus|music|ecosystems|organisms|social sciences|agricultural|agriculture|wild|wildfire|covid|Clinically|employee|oil|ocean|bug reports|emotions|emotional|cellular|chemistry|biological|medic|medical|game|games|Phishing|facebook|tiktok|social network|social networks|fraud|cyber|cord)\\b',
+        '$options': 'is'
+    };
+    
